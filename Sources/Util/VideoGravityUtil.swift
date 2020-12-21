@@ -1,8 +1,14 @@
-import Foundation
 import AVFoundation
 
+extension CGRect {
+    var aspectRatio: CGFloat {
+        width / height
+    }
+}
+
 final class VideoGravityUtil {
-    @inline(__always) static func calclute(_ videoGravity:AVLayerVideoGravity, inRect:inout CGRect, fromRect:inout CGRect) {
+    @inline(__always)
+    static func calculate(_ videoGravity: AVLayerVideoGravity, inRect: inout CGRect, fromRect: inout CGRect) {
         switch videoGravity {
         case .resizeAspect:
             resizeAspect(&inRect, fromRect: &fromRect)
@@ -13,10 +19,11 @@ final class VideoGravityUtil {
         }
     }
 
-    @inline(__always) static func resizeAspect(_ inRect:inout CGRect, fromRect:inout CGRect) {
-        let xRatio:CGFloat = inRect.width / fromRect.width
-        let yRatio:CGFloat = inRect.height / fromRect.height
-        if (yRatio < xRatio) {
+    @inline(__always)
+    static func resizeAspect(_ inRect: inout CGRect, fromRect: inout CGRect) {
+        let xRatio: CGFloat = inRect.width / fromRect.width
+        let yRatio: CGFloat = inRect.height / fromRect.height
+        if yRatio < xRatio {
             inRect.origin.x = (inRect.size.width - fromRect.size.width * yRatio) / 2
             inRect.size.width = fromRect.size.width * yRatio
         } else {
@@ -25,10 +32,11 @@ final class VideoGravityUtil {
         }
     }
 
-    @inline(__always) static func resizeAspectFill(_ inRect:inout CGRect, fromRect:inout CGRect) {
-        let inRectAspect:CGFloat = inRect.size.width / inRect.size.height
-        let fromRectAspect:CGFloat = fromRect.size.width / fromRect.size.height
-        if (inRectAspect < fromRectAspect) {
+    @inline(__always)
+    static func resizeAspectFill(_ inRect: inout CGRect, fromRect: inout CGRect) {
+        let inRectAspect: CGFloat = inRect.aspectRatio
+        let fromRectAspect: CGFloat = fromRect.aspectRatio
+        if inRectAspect < fromRectAspect {
             inRect.origin.x += (inRect.size.width - inRect.size.height * fromRectAspect) / 2
             inRect.size.width = inRect.size.height * fromRectAspect
         } else {

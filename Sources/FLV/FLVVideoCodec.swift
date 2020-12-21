@@ -1,15 +1,16 @@
 import Foundation
 
-enum FLVVideoCodec: UInt8 {
+/// The type of flv supports video codecs.
+public enum FLVVideoCodec: UInt8 {
     case sorensonH263 = 2
-    case screen1      = 3
-    case on2VP6       = 4
-    case on2VP6Alpha  = 5
-    case screen2      = 6
-    case avc          = 7
-    case unknown      = 0xFF
-    
-    var isSupported:Bool {
+    case screen1 = 3
+    case on2VP6 = 4
+    case on2VP6Alpha = 5
+    case screen2 = 6
+    case avc = 7
+    case unknown = 0xFF
+
+    var isSupported: Bool {
         switch self {
         case .sorensonH263:
             return false

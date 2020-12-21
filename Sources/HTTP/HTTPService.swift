@@ -7,8 +7,8 @@ enum HTTPVersion: String {
 
 extension HTTPVersion: CustomStringConvertible {
     // MARK: CustomStringConvertible
-    var description:String {
-        return rawValue
+    var description: String {
+        rawValue
     }
 }
 
@@ -27,47 +27,47 @@ enum HTTPMethod: String {
 // MARK: -
 enum HTTPStatusCode: Int {
     case `continue`                   = 100
-    case switchingProtocols           = 101
-    case ok                           = 200
-    case created                      = 201
-    case accepted                     = 202
-    case nonAuthoritative             = 203
-    case noContent                    = 204
-    case resetContent                 = 205
-    case partialContent               = 206
-    case multipleChoices              = 300
-    case movedParmanently             = 301
-    case found                        = 302
-    case seeOther                     = 303
-    case notModified                  = 304
-    case useProxy                     = 305
-    case temporaryRedirect	          = 307
-    case badRequest                   = 400
-    case unauthorixed                 = 401
-    case paymentRequired              = 402
-    case forbidden                    = 403
-    case notFound                     = 404
-    case methodNotAllowed             = 405
-    case notAcceptable                = 406
-    case proxyAuthenticationRequired  = 407
-    case requestTimeOut               = 408
-    case conflict                     = 409
-    case gone                         = 410
-    case lengthRequired               = 411
-    case preconditionFailed	          = 412
-    case requestEntityTooLarge        = 413
-    case requestURITooLarge           = 414
-    case unsupportedMediaType         = 415
+    case switchingProtocols = 101
+    case ok = 200
+    case created = 201
+    case accepted = 202
+    case nonAuthoritative = 203
+    case noContent = 204
+    case resetContent = 205
+    case partialContent = 206
+    case multipleChoices = 300
+    case movedParmanently = 301
+    case found = 302
+    case seeOther = 303
+    case notModified = 304
+    case useProxy = 305
+    case temporaryRedirect = 307
+    case badRequest = 400
+    case unauthorixed = 401
+    case paymentRequired = 402
+    case forbidden = 403
+    case notFound = 404
+    case methodNotAllowed = 405
+    case notAcceptable = 406
+    case proxyAuthenticationRequired = 407
+    case requestTimeOut = 408
+    case conflict = 409
+    case gone = 410
+    case lengthRequired = 411
+    case preconditionFailed = 412
+    case requestEntityTooLarge = 413
+    case requestURITooLarge = 414
+    case unsupportedMediaType = 415
     case requestedRangeNotSatisfiable = 416
-    case expectationFailed            = 417
-    case internalServerError          = 500
-    case notImplemented               = 501
-    case badGateway                   = 502
-    case serviceUnavailable           = 503
-    case gatewayTimeOut               = 504
-    case httpVersionNotSupported      = 505
+    case expectationFailed = 417
+    case internalServerError = 500
+    case notImplemented = 501
+    case badGateway = 502
+    case serviceUnavailable = 503
+    case gatewayTimeOut = 504
+    case httpVersionNotSupported = 505
 
-    var message:String {
+    var message: String {
         switch self {
         case .continue:
             return "Continue"
@@ -155,33 +155,42 @@ enum HTTPStatusCode: Int {
 
 extension HTTPStatusCode: CustomStringConvertible {
     // MARK: CustomStringConvertible
-    var description:String {
-        return "\(rawValue) \(message)"
+    var description: String {
+        "\(rawValue) \(message)"
     }
 }
 
 // MARK: -
 open class HTTPService: NetService {
-    open class var type:String{
-        return "_http._tcp"
+    open class var type: String {
+        "_http._tcp"
     }
-    open class var defaultPort:Int32 {
-        return 8080
+    open class var defaultPort: Int32 {
+        8080
     }
-    open class var defaultDocument:String {
-        return "<!DOCTYPE html><html><head><meta charset=\"UTF-8\" /><title>lf</title></head><body>lf</body></html>"
+    open class var defaultDocument: String {
+        """
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>HaishinKit</title>
+</head>
+<body></body>
+</html>
+"""
     }
 
-    var document:String = HTTPService.defaultDocument
+    var document: String = HTTPService.defaultDocument
 
-    func client(inputBuffer client:NetClient) {
-        guard let request:HTTPRequest = HTTPRequest(data: client.inputBuffer) else {
+    func client(inputBuffer client: NetClient) {
+        guard let request = HTTPRequest(data: client.inputBuffer) else {
             disconnect(client)
             return
         }
         client.inputBuffer.removeAll()
-        if (logger.isEnabledFor(level: .trace)) {
-            logger.trace("\(request):\(self)")
+        if logger.isEnabledFor(level: .trace) {
+            logger.trace("\(request): \(self)")
         }
         switch request.method {
         case "GET":
@@ -205,83 +214,78 @@ open class HTTPService: NetService {
         }
     }
 
-    open func get(_ request:HTTPRequest, client:NetClient) {
+    open func get(_ request: HTTPRequest, client: NetClient) {
         notFound(request, client: client)
     }
 
-    open func post(_ request:HTTPRequest, client:NetClient) {
+    open func post(_ request: HTTPRequest, client: NetClient) {
         notFound(request, client: client)
     }
 
-    open func put(_ request:HTTPRequest, client:NetClient) {
+    open func put(_ request: HTTPRequest, client: NetClient) {
         notFound(request, client: client)
     }
 
-    open func delete(_ request:HTTPRequest, client:NetClient) {
+    open func delete(_ request: HTTPRequest, client: NetClient) {
         notFound(request, client: client)
     }
 
-    open func head(_ request:HTTPRequest, client:NetClient) {
+    open func head(_ request: HTTPRequest, client: NetClient) {
         notFound(request, client: client)
     }
 
-    open func options(_ requst:HTTPRequest, client: NetClient) {
+    open func options(_ requst: HTTPRequest, client: NetClient) {
         notFound(requst, client: client)
     }
 
-    open func trace(_ request:HTTPRequest, client:NetClient) {
+    open func trace(_ request: HTTPRequest, client: NetClient) {
         notFound(request, client: client)
     }
 
-    open func connect(_ request:HTTPRequest, client:NetClient) {
+    open func connect(_ request: HTTPRequest, client: NetClient) {
         notFound(request, client: client)
     }
 
-    func notFound(_ request:HTTPRequest, client:NetClient) {
-        var response:HTTPResponse = HTTPResponse()
+    func notFound(_ request: HTTPRequest, client: NetClient) {
+        var response = HTTPResponse()
         response.statusCode = HTTPStatusCode.notFound.description
         client.doOutput(data: response.data)
     }
 }
 
 open class HLSService: HTTPService {
-    fileprivate(set) var streams:[HTTPStream] = []
+    private(set) var streams: [HTTPStream] = []
 
-    open func addHTTPStream(_ stream:HTTPStream) {
-        for i in 0..<streams.count {
-            if (stream.name == streams[i].name) {
-                return
-            }
+    open func addHTTPStream(_ stream: HTTPStream) {
+        for i in 0..<streams.count where stream.name == streams[i].name {
+            return
         }
         streams.append(stream)
     }
 
-    open func removeHTTPStream(_ stream:HTTPStream) {
-        for i in 0..<streams.count {
-            if (stream.name == streams[i].name) {
-                streams.remove(at: i)
-                return
-            }
+    open func removeHTTPStream(_ stream: HTTPStream) {
+        for i in 0..<streams.count where stream.name == streams[i].name {
+            streams.remove(at: i)
+            return
         }
     }
 
-    open override func get(_ request:HTTPRequest, client:NetClient) {
+    override open func get(_ request: HTTPRequest, client: NetClient) {
         logger.trace("\(request)")
-        var response:HTTPResponse = HTTPResponse()
-        
-        // #141
-        response.headerFields["Access-Control-Allow-Headers"] = "*"
-        response.headerFields["Access-Control-Allow-Methods"] = "GET,HEAD,OPTIONS"
-        response.headerFields["Access-Control-Allow-Origin"] = "*"
-        response.headerFields["Access-Control-Expose-Headers"] = "*"
-        
-        response.headerFields["Connection"] = "close"
-        
+        var response: HTTPResponse = [
+            // #141
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Methods": "GET,HEAD,OPTIONS",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Expose-Headers": "*",
+            "Connection": "close"
+        ]
+
         defer {
             logger.trace("\(response)")
             disconnect(client)
         }
-        
+
         switch request.uri {
         case "/":
             response.headerFields["Content-Type"] = "text/html"
@@ -295,14 +299,13 @@ open class HLSService: HTTPService {
                 response.statusCode = HTTPStatusCode.ok.description
                 response.headerFields["Content-Type"] = mime.rawValue
                 switch mime {
-                case .VideoMP2T:
-                    if let info:[FileAttributeKey:Any] = try? FileManager.default.attributesOfItem(atPath: resource) {
-                        if let length:Any = info[FileAttributeKey.size] {
-                            response.headerFields["Content-Length"] = String(describing: length)
-                        }
+                case .videoMP2T:
+                    if let info: [FileAttributeKey: Any] = try? FileManager.default.attributesOfItem(atPath: resource),
+                        let length: Any = info[FileAttributeKey.size] {
+                        response.headerFields["Content-Length"] = String(describing: length)
                     }
                     client.doOutput(data: response.data)
-                    client.doOutputFromURL(URL(fileURLWithPath: resource), length: 8 * 1024)
+                    doOutputFromURL(client, url: URL(fileURLWithPath: resource), length: 8 * 1024)
                 default:
                     response.statusCode = HTTPStatusCode.ok.description
                     response.body = Data(resource.utf8)
@@ -314,5 +317,24 @@ open class HLSService: HTTPService {
             client.doOutput(data: response.data)
         }
     }
-}
 
+    func doOutputFromURL(_ client: NetClient, url: URL, length: Int) {
+        do {
+            let fileHandle: FileHandle = try FileHandle(forReadingFrom: url)
+            defer {
+                fileHandle.closeFile()
+            }
+            let endOfFile = Int(fileHandle.seekToEndOfFile())
+            for i in 0..<Int(endOfFile / length) {
+                fileHandle.seek(toFileOffset: UInt64(i * length))
+                client.doOutput(data: fileHandle.readData(ofLength: length))
+            }
+            let remain: Int = endOfFile % length
+            if 0 < remain {
+                client.doOutput(data: fileHandle.readData(ofLength: remain))
+            }
+        } catch let error as NSError {
+            logger.error("\(error)")
+        }
+    }
+}

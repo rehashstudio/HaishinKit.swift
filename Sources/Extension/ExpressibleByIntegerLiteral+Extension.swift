@@ -1,28 +1,23 @@
 import Foundation
 
 extension ExpressibleByIntegerLiteral {
-    var data:Data {
-        var value:Self = self
-        let s:Int = MemoryLayout<`Self`>.size
-        return withUnsafeMutablePointer(to: &value) {
-            $0.withMemoryRebound(to: UInt8.self, capacity: s) {
-                Data(UnsafeBufferPointer(start: $0, count: s))
-            }
-        }
+    var data: Data {
+        var value: Self = self
+        return Data(bytes: &value, count: MemoryLayout<Self>.size)
     }
 
-    init(data:Data) {
-        let diff:Int = MemoryLayout<Self>.size - data.count
-        if (0 < diff) {
-            var buffer:Data = Data(repeating: 0, count: diff)
+    init(data: Data) {
+        let diff: Int = MemoryLayout<Self>.size - data.count
+        if 0 < diff {
+            var buffer = Data(repeating: 0, count: diff)
             buffer.append(data)
-            self = buffer.withUnsafeBytes { $0.pointee }
+            self = buffer.withUnsafeBytes { $0.baseAddress!.assumingMemoryBound(to: Self.self).pointee }
             return
         }
-        self = data.withUnsafeBytes { $0.pointee }
+        self = data.withUnsafeBytes { $0.baseAddress!.assumingMemoryBound(to: Self.self).pointee }
     }
 
-    init(data:MutableRangeReplaceableRandomAccessSlice<Data>) {
+    init(data: Slice<Data>) {
         self.init(data: Data(data))
     }
 }

@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 
+static NSString *const __nonnull HaishinKitIdentifier = @"com.haishinkit.HaishinKit";
 FOUNDATION_EXPORT double HaishinKitVersionNumber;
 FOUNDATION_EXPORT const unsigned char HaishinKitVersionString[];
 
@@ -13,7 +14,7 @@ NS_INLINE void nstry(void(^_Nonnull lambda)(void), void(^_Nullable error)(NSExce
             @try {
                 error(exception);
             }@catch(NSException *exception) {
-                
+
             }
         }
     }

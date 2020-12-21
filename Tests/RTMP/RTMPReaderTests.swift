@@ -5,14 +5,13 @@ import XCTest
 
 final class RTMPReaderTests: XCTestCase {
     func testReader() {
-        let bundle:Bundle = Bundle(for: type(of: self))
-        let url:URL = URL(fileURLWithPath: bundle.path(forResource: "SampleVideo_360x240_5mb", ofType: "flv")!)
+        let bundle: Bundle = Bundle(for: type(of: self))
+        let url: URL = URL(fileURLWithPath: bundle.path(forResource: "SampleVideo_360x240_5mb", ofType: "flv")!)
         let reader = FLVReader(url: url)
         while true {
             guard let tag = reader.next() else {
                 return
             }
-            print(tag)
         }
     }
 }

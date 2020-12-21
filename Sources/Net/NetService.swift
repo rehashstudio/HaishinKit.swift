@@ -1,33 +1,32 @@
 import Foundation
 
 open class NetService: NSObject {
-
-    open var txtData:Data? {
-        return nil
+    open var txtData: Data? {
+        nil
     }
 
-    let lockQueue:DispatchQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.NetService.lock")
-    var networkQueue:DispatchQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.NetService.network")
+    let lockQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.NetService.lock")
+    var networkQueue = DispatchQueue(label: "com.haishinkit.HaishinKit.NetService.network")
 
-    fileprivate(set) var domain:String
-    fileprivate(set) var name:String
-    fileprivate(set) var port:Int32
-    fileprivate(set) var type:String
-    fileprivate(set) var running:Bool = false
-    fileprivate(set) var clients:[NetClient] = []
-    fileprivate(set) var service:Foundation.NetService!
-    fileprivate var runloop:RunLoop!
+    public private(set) var domain: String
+    public private(set) var name: String
+    public private(set) var port: Int32
+    public private(set) var type: String
+    public private(set) var isRunning: Atomic<Bool> = .init(false)
+    public private(set) var clients: [NetClient] = []
+    private(set) var service: Foundation.NetService!
+    private var runloop: RunLoop!
 
-    public init(domain:String, type:String, name:String, port:Int32) {
+    public init(domain: String, type: String, name: String, port: Int32) {
         self.domain = domain
         self.name = name
         self.port = port
         self.type = type
     }
 
-    func disconnect(_ client:NetClient) {
+    func disconnect(_ client: NetClient) {
         lockQueue.sync {
-            guard let index:Int = clients.index(of: client) else {
+            guard let index: Int = clients.firstIndex(of: client) else {
                 return
             }
             clients.remove(at: index)
@@ -43,8 +42,8 @@ open class NetService: NSObject {
     }
 
     func willStopRunning() {
-        if let runloop:RunLoop = runloop {
-            service.remove(from: runloop, forMode: RunLoopMode.defaultRunLoopMode)
+        if let runloop: RunLoop = runloop {
+            service.remove(from: runloop, forMode: RunLoop.Mode.default)
             CFRunLoopStop(runloop.getCFRunLoop())
         }
         service.stop()
@@ -53,16 +52,16 @@ open class NetService: NSObject {
         runloop = nil
     }
 
-    fileprivate func initService() {
-        runloop = RunLoop.current
+    private func initService() {
+        runloop = .current
         service = Foundation.NetService(domain: domain, type: type, name: name, port: port)
         service.delegate = self
         service.setTXTRecord(txtData)
-        service.schedule(in: runloop, forMode: RunLoopMode.defaultRunLoopMode)
-        if (type.contains("._udp")) {
+        service.schedule(in: runloop, forMode: RunLoop.Mode.default)
+        if type.contains("._udp") {
             service.publish()
         } else {
-            service.publish(options: Foundation.NetService.Options.listenForConnections)
+            service.publish(options: .listenForConnections)
         }
         runloop.run()
     }
@@ -72,7 +71,7 @@ extension NetService: NetServiceDelegate {
     // MARK: NSNetServiceDelegate
     public func netService(_ sender: Foundation.NetService, didAcceptConnectionWith inputStream: InputStream, outputStream: OutputStream) {
         lockQueue.sync {
-            let client:NetClient = NetClient(service: sender, inputStream: inputStream, outputStream: outputStream)
+            let client = NetClient(service: sender, inputStream: inputStream, outputStream: outputStream)
             clients.append(client)
             client.delegate = self
             client.acceptConnection()
@@ -84,25 +83,25 @@ extension NetService: NetClientDelegate {
     // MARK: NetClientDelegate
 }
 
-extension NetService: Runnable {
+extension NetService: Running {
     // MARK: Runnbale
-    final public func startRunning() {
+    public func startRunning() {
         lockQueue.async {
-            if (self.running) {
+            if self.isRunning.value {
                 return
             }
             self.willStartRunning()
-            self.running = true
+            self.isRunning.mutate { $0 = true }
         }
     }
 
-    final public func stopRunning() {
+    public func stopRunning() {
         lockQueue.async {
-            if (!self.running) {
+            if !self.isRunning.value {
                 return
             }
             self.willStopRunning()
-            self.running = false
+            self.isRunning.mutate { $0 = false }
         }
     }
 }

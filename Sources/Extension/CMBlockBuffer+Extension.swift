@@ -1,16 +1,17 @@
 import CoreMedia
 
 extension CMBlockBuffer {
-    var dataLength:Int {
-        return CMBlockBufferGetDataLength(self)
+    @available(iOS, obsoleted: 13.0)
+    @available(tvOS, obsoleted: 13.0)
+    @available(macOS, obsoleted: 10.15)
+    var dataLength: Int {
+        CMBlockBufferGetDataLength(self)
     }
-}
 
-extension CMBlockBuffer {
-    var data:Data? {
-        var length:Int = 0
-        var buffer:UnsafeMutablePointer<Int8>? = nil
-        guard CMBlockBufferGetDataPointer(self, 0, nil, &length, &buffer) == noErr else {
+    var data: Data? {
+        var length: Int = 0
+        var buffer: UnsafeMutablePointer<Int8>?
+        guard CMBlockBufferGetDataPointer(self, atOffset: 0, lengthAtOffsetOut: nil, totalLengthOut: &length, dataPointerOut: &buffer) == noErr else {
             return nil
         }
         return Data(bytes: buffer!, count: length)

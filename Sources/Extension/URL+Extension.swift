@@ -1,36 +1,29 @@
 import Foundation
 
 extension URL {
-    var absoluteWithoutAuthenticationString:String {
-        var target:String = ""
-        if let user:String = user {
-            target += user
+    var absoluteWithoutAuthenticationString: String {
+        guard var components = URLComponents(string: absoluteString) else {
+            return absoluteString
         }
-        if let password:String = password {
-            target += ":" + password
-        }
-        if (target != "") {
-            target += "@"
-        }
-        return absoluteString.replacingOccurrences(of: target, with: "")
+        components.password = nil
+        components.user = nil
+        return components.url?.absoluteString ?? absoluteString
     }
-    
-    var absoluteWithoutQueryString:String {
-        guard let query:String = self.query else {
+
+    var absoluteWithoutQueryString: String {
+        guard let query: String = self.query else {
             return self.absoluteString
         }
         return absoluteString.replacingOccurrences(of: "?" + query, with: "")
     }
-    
-    func dictionaryFromQuery() -> [String:String] {
-        var result:[String:String] = [:]
-        guard
-            let comonents:URLComponents = URLComponents(string: absoluteString),
-            let queryItems = comonents.queryItems else {
-                return result
+
+    func dictionaryFromQuery() -> [String: String] {
+        var result: [String: String] = [:]
+        guard let query = URLComponents(string: absoluteString)?.queryItems else {
+            return result
         }
-        for item in queryItems {
-            if let value:String = item.value {
+        for item in query {
+            if let value: String = item.value {
                 result[item.name] = value
             }
         }

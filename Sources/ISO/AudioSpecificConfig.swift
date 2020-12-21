@@ -1,6 +1,4 @@
-import Foundation
 import AVFoundation
-
 /**
  The Audio Specific Config is the global header for MPEG-4 Audio
  
@@ -9,25 +7,25 @@ import AVFoundation
   - http://wiki.multimedia.cx/?title=Understanding_AAC
  */
 struct AudioSpecificConfig {
-    static let ADTSHeaderSize:Int = 7
+    static let ADTSHeaderSize: Int = 7
 
-    var type:AudioObjectType
-    var frequency:SamplingFrequency
-    var channel:ChannelConfiguration
-    var frameLengthFlag:Bool = false
+    let type: AudioObjectType
+    let frequency: SamplingFrequency
+    let channel: ChannelConfiguration
+    let frameLengthFlag: Bool = false
 
-    var bytes:[UInt8] {
-        var bytes:[UInt8] = [UInt8](repeating: 0, count: 2)
-        bytes[0] = type.rawValue << 3 | (frequency.rawValue >> 1 & 0x3)
+    var bytes: [UInt8] {
+        var bytes: [UInt8] = [UInt8](repeating: 0, count: 2)
+        bytes[0] = type.rawValue << 3 | (frequency.rawValue >> 1)
         bytes[1] = (frequency.rawValue & 0x1) << 7 | (channel.rawValue & 0xF) << 3
         return bytes
     }
 
-    init?(bytes:[UInt8]) {
-        guard let
-            type:AudioObjectType = AudioObjectType(rawValue: bytes[0] >> 3),
-            let frequency:SamplingFrequency = SamplingFrequency(rawValue: (bytes[0] & 0b00000111) << 1 | (bytes[1] >> 7)),
-            let channel:ChannelConfiguration = ChannelConfiguration(rawValue: (bytes[1] & 0b01111000) >> 3) else {
+    init?(bytes: [UInt8]) {
+        guard
+            let type = AudioObjectType(rawValue: bytes[0] >> 3),
+            let frequency = SamplingFrequency(rawValue: (bytes[0] & 0b00000111) << 1 | (bytes[1] >> 7)),
+            let channel = ChannelConfiguration(rawValue: (bytes[1] & 0b01111000) >> 3) else {
             return nil
         }
         self.type = type
@@ -35,23 +33,23 @@ struct AudioSpecificConfig {
         self.channel = channel
     }
 
-    init(type:AudioObjectType, frequency:SamplingFrequency, channel:ChannelConfiguration) {
+    init(type: AudioObjectType, frequency: SamplingFrequency, channel: ChannelConfiguration) {
         self.type = type
         self.frequency = frequency
         self.channel = channel
     }
 
     init(formatDescription: CMFormatDescription) {
-        let asbd:AudioStreamBasicDescription = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription)!.pointee
+        let asbd: AudioStreamBasicDescription = CMAudioFormatDescriptionGetStreamBasicDescription(formatDescription)!.pointee
         type = AudioObjectType(objectID: MPEG4ObjectID(rawValue: Int(asbd.mFormatFlags))!)
         frequency = SamplingFrequency(sampleRate: asbd.mSampleRate)
         channel = ChannelConfiguration(rawValue: UInt8(asbd.mChannelsPerFrame))!
     }
 
-    func adts(_ length:Int) -> [UInt8] {
-        let size:Int = 7
-        let fullSize:Int = size + length
-        var adts:[UInt8] = [UInt8](repeating: 0x00, count: size)
+    func adts(_ length: Int) -> [UInt8] {
+        let size: Int = 7
+        let fullSize: Int = size + length
+        var adts: [UInt8] = [UInt8](repeating: 0x00, count: size)
         adts[0] = 0xFF
         adts[1] = 0xF9
         adts[2] = (type.rawValue - 1) << 6 | (frequency.rawValue << 2) | (channel.rawValue >> 2)
@@ -62,40 +60,40 @@ struct AudioSpecificConfig {
         return adts
     }
 
-    func createAudioStreamBasicDescription() -> AudioStreamBasicDescription {
-        var asbd:AudioStreamBasicDescription = AudioStreamBasicDescription()
-        asbd.mSampleRate = frequency.sampleRate
-        asbd.mFormatID = kAudioFormatMPEG4AAC
-        asbd.mFormatFlags = UInt32(type.rawValue)
-        asbd.mBytesPerPacket = 0
-        asbd.mFramesPerPacket = frameLengthFlag ? 960 : 1024
-        asbd.mBytesPerFrame = 0
-        asbd.mChannelsPerFrame = UInt32(channel.rawValue)
-        asbd.mBitsPerChannel = 0
-        asbd.mReserved = 0
-        return asbd
+    func audioStreamBasicDescription() -> AudioStreamBasicDescription {
+        AudioStreamBasicDescription(
+            mSampleRate: frequency.sampleRate,
+            mFormatID: kAudioFormatMPEG4AAC,
+            mFormatFlags: UInt32(type.rawValue),
+            mBytesPerPacket: 0,
+            mFramesPerPacket: frameLengthFlag ? 960 : 1024,
+            mBytesPerFrame: 0,
+            mChannelsPerFrame: UInt32(channel.rawValue),
+            mBitsPerChannel: 0,
+            mReserved: 0
+        )
     }
 }
 
-extension AudioSpecificConfig: CustomStringConvertible {
-    // MARK: CustomStringConvertible
-    var description:String {
-        return Mirror(reflecting: self).description
+extension AudioSpecificConfig: CustomDebugStringConvertible {
+    // MARK: CustomDebugStringConvertible
+    var debugDescription: String {
+        Mirror(reflecting: self).debugDescription
     }
 }
 
 // MARK: -
 enum AudioObjectType: UInt8 {
-    case unknown     = 0
-    case aacMain     = 1
-    case aaclc       = 2
-    case aacssr      = 3
-    case aacltp      = 4
-    case aacsbr      = 5
+    case unknown = 0
+    case aacMain = 1
+    case aaclc = 2
+    case aacssr = 3
+    case aacltp = 4
+    case aacsbr = 5
     case aacScalable = 6
-    case twinqVQ     = 7
-    case celp        = 8
-    case hxvc        = 9
+    case twinqVQ = 7
+    case celp = 8
+    case hxvc = 9
 
     init(objectID: MPEG4ObjectID) {
         switch objectID {
@@ -117,12 +115,14 @@ enum AudioObjectType: UInt8 {
             self = .celp
         case .HVXC:
             self = .hxvc
+        @unknown default:
+            self = .unknown
         }
     }
 }
 
 // MARK: -
-enum SamplingFrequency: UInt8 {
+public enum SamplingFrequency: UInt8 {
     case hz96000 = 0
     case hz88200 = 1
     case hz64000 = 2
@@ -134,10 +134,10 @@ enum SamplingFrequency: UInt8 {
     case hz16000 = 8
     case hz12000 = 9
     case hz11025 = 10
-    case hz8000  = 11
-    case hz7350  = 12
+    case hz8000 = 11
+    case hz7350 = 12
 
-    var sampleRate:Float64 {
+    public var sampleRate: Float64 {
         switch self {
         case .hz96000:
             return 96000
@@ -168,7 +168,7 @@ enum SamplingFrequency: UInt8 {
         }
     }
 
-    init(sampleRate:Float64) {
+    public init(sampleRate: Float64) {
         switch Int(sampleRate) {
         case 96000:
             self = .hz96000
