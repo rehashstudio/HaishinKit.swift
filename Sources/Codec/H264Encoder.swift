@@ -6,7 +6,7 @@ import VideoToolbox
 import UIKit
 #endif
 
-public protocol VideoEncoderDelegate: class {
+public protocol VideoEncoderDelegate: AnyObject {
     func didSetFormatDescription(video formatDescription: CMFormatDescription?)
     func sampleOutput(video sampleBuffer: CMSampleBuffer)
 }
@@ -60,10 +60,17 @@ public final class H264Encoder {
         kCVPixelBufferOpenGLESCompatibilityKey: kCFBooleanTrue
     ]
     #else
-    static let defaultAttributes: [NSString: AnyObject] = [
-        kCVPixelBufferIOSurfacePropertiesKey: [:] as AnyObject,
-        kCVPixelBufferOpenGLCompatibilityKey: kCFBooleanTrue
-    ]
+        #if arch(arm64)
+        static var defaultAttributes: [NSString: AnyObject] = [
+            kCVPixelBufferIOSurfacePropertiesKey: [:] as AnyObject,
+            kCVPixelBufferMetalCompatibilityKey: kCFBooleanTrue
+        ]
+        #else
+        static var defaultAttributes: [NSString: AnyObject] = [
+            kCVPixelBufferIOSurfacePropertiesKey: [:] as AnyObject,
+            kCVPixelBufferOpenGLCompatibilityKey: kCFBooleanTrue
+        ]
+        #endif
     #endif
 
     public var settings: Setting<H264Encoder, Option> = [:] {
@@ -73,7 +80,7 @@ public final class H264Encoder {
     }
     public private(set) var isRunning: Atomic<Bool> = .init(false)
 
-    var muted: Bool = false
+    var muted = false
     var scalingMode: ScalingMode = H264Encoder.defaultScalingMode {
         didSet {
             guard scalingMode != oldValue else {
@@ -100,7 +107,7 @@ public final class H264Encoder {
         }
     }
     #if os(macOS)
-    var enabledHardwareEncoder: Bool = true {
+    var enabledHardwareEncoder = true {
         didSet {
             guard enabledHardwareEncoder != oldValue else {
                 return
@@ -160,7 +167,7 @@ public final class H264Encoder {
         attributes[kCVPixelBufferHeightKey] = NSNumber(value: height)
         return attributes
     }
-    private var invalidateSession: Bool = true
+    private var invalidateSession = true
     private var lastImageBuffer: CVImageBuffer?
 
     // @see: https://developer.apple.com/library/mac/releasenotes/General/APIDiffsMacOSX10_8/VideoToolbox.html
@@ -179,7 +186,11 @@ public final class H264Encoder {
         ]
 #if os(OSX)
         if enabledHardwareEncoder {
+            #if arch(arm64)
+            properties[kVTVideoEncoderSpecification_EncoderID] = "com.apple.videotoolbox.videoencoder.ave.avc" as NSObject
+            #else
             properties[kVTVideoEncoderSpecification_EncoderID] = "com.apple.videotoolbox.videoencoder.h264.gva" as NSObject
+            #endif
             properties["EnableHardwareAcceleratedVideoEncoder"] = kCFBooleanTrue
             properties["RequireHardwareAcceleratedVideoEncoder"] = kCFBooleanTrue
         }
@@ -190,7 +201,7 @@ public final class H264Encoder {
         return properties
     }
 
-    private var callback: VTCompressionOutputCallback = {(outputCallbackRefCon: UnsafeMutableRawPointer?, sourceFrameRefCon: UnsafeMutableRawPointer?, status: OSStatus, infoFlags: VTEncodeInfoFlags, sampleBuffer: CMSampleBuffer?) in
+    private var callback: VTCompressionOutputCallback = {(outputCallbackRefCon: UnsafeMutableRawPointer?, _: UnsafeMutableRawPointer?, status: OSStatus, _: VTEncodeInfoFlags, sampleBuffer: CMSampleBuffer?) in
         guard
             let refcon: UnsafeMutableRawPointer = outputCallbackRefCon,
             let sampleBuffer: CMSampleBuffer = sampleBuffer, status == noErr else {

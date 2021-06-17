@@ -7,7 +7,7 @@ import VideoToolbox
 import UIKit
 #endif
 
-protocol VideoDecoderDelegate: class {
+protocol VideoDecoderDelegate: AnyObject {
     func sampleOutput(video sampleBuffer: CMSampleBuffer)
 }
 
@@ -60,8 +60,8 @@ final class H264Decoder {
             }
         }
     }
-    private var invalidateSession: Bool = true
-    private var callback: VTDecompressionOutputCallback = {(decompressionOutputRefCon: UnsafeMutableRawPointer?, sourceFrameRefCon: UnsafeMutableRawPointer?, status: OSStatus, infoFlags: VTDecodeInfoFlags, imageBuffer: CVBuffer?, presentationTimeStamp: CMTime, duration: CMTime) in
+    private var invalidateSession = true
+    private var callback: VTDecompressionOutputCallback = {(decompressionOutputRefCon: UnsafeMutableRawPointer?, _: UnsafeMutableRawPointer?, status: OSStatus, infoFlags: VTDecodeInfoFlags, imageBuffer: CVBuffer?, presentationTimeStamp: CMTime, duration: CMTime) in
         let decoder: H264Decoder = Unmanaged<H264Decoder>.fromOpaque(decompressionOutputRefCon!).takeUnretainedValue()
         decoder.didOutputForSession(status, infoFlags: infoFlags, imageBuffer: imageBuffer, presentationTimeStamp: presentationTimeStamp, duration: duration)
     }

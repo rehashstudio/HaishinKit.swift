@@ -5,7 +5,25 @@
 [![GitHub license](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://raw.githubusercontent.com/shogo4405/HaishinKit.swift/master/LICENSE.md)
 
 * Camera and Microphone streaming library via RTMP, HLS for iOS, macOS, tvOS.
-* Issuesの言語は、英語か、日本語でお願いします！
+* Issuesの言語は、日本語が分かる方は日本語でお願いします！
+
+<p align="center">
+<strong>Sponsored with 💖 by</strong><br />
+<a href="https://getstream.io/chat/sdk/ios/?utm_source=https://github.com/shogo4405/HaishinKit.swift&utm_medium=github&utm_content=developer&utm_term=swift" target="_blank">
+<img src="https://stream-blog-v2.imgix.net/blog/wp-content/uploads/f7401112f41742c4e173c30d4f318cb8/stream_logo_white.png?w=350" alt="Stream Chat" style="margin: 8px" />
+</a>
+<br />
+Enterprise Grade APIs for Feeds & Chat. <a href="https://getstream.io/tutorials/ios-chat/?utm_source=github.com/shogo4405/HaishinKit.swift&utm_medium=github&utm_campaign=oss_sponsorship" target="_blank">Try the iOS Chat tutorial</a> 💬
+</p>
+
+## Communication
+* If you need help with making LiveStreaming requests using HaishinKit, use a GitHub issue with **Bug report template**
+  - The trace level log is very useful. Please set `Logboard.with(HaishinKitIdentifier).level = .trace`. 
+  - If you don't use an issue template. I will immediately close the your issue without a comment.
+* If you'd like to discuss a feature request, use a GitHub issue with **Feature request template**.
+* If you want to support e-mail based communication without GitHub issue.
+  - Consulting fee is [$50](https://www.paypal.me/shogo4405/50USD)/1 incident. I'm able to response a few days.
+* If you **want to contribute**, submit a pull request!
 
 ## Features
 ### RTMP
@@ -74,7 +92,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 use_frameworks!
 
 def import_pods
-    pod 'HaishinKit', '~> 1.1.0'
+    pod 'HaishinKit', '~> 1.1.5'
 end
 
 target 'Your Target'  do
@@ -84,7 +102,7 @@ end
 ```
 ### Carthage
 ```
-github "shogo4405/HaishinKit.swift" ~> 1.1.0
+github "shogo4405/HaishinKit.swift" ~> 1.1.5
 ```
 ### Swift Package Manager
 ```
@@ -245,10 +263,15 @@ view.addSubview(hkView)
 ```
 
 ## FAQ
-### Do you support me via Email?
-Yes. Consulting fee is [$50](https://www.paypal.me/shogo4405/50USD)/1 incident. I don't recommend. 
-Please consider to use Issues.
+### How can I run example project?
+```sh
+git clone https://github.com/shogo4405/HaishinKit.swift.git
+cd HaishinKit.swift
 
+carthage bootstrap --use-xcframeworks
+
+open HaishinKit.xcodeproj
+```
 
 ## Reference
 * Adobe’s Real Time Messaging Protocol

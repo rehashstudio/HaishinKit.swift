@@ -5,7 +5,7 @@ import MetalKit
   A view that displays a video content of a NetStream object which uses Metal api.
  */
 open class MTHKView: MTKView, NetStreamRenderer {
-    open var isMirrored: Bool = false
+    open var isMirrored = false
     /// A value that specifies how the video is displayed within a player layer’s bounds.
     open var videoGravity: AVLayerVideoGravity = .resizeAspect
     /// A value that displays a video format.
@@ -20,6 +20,11 @@ open class MTHKView: MTKView, NetStreamRenderer {
 
     var displayImage: CIImage?
     let colorSpace: CGColorSpace = CGColorSpaceCreateDeviceRGB()
+
+    private lazy var commandQueue: MTLCommandQueue? = {
+        return device?.makeCommandQueue()
+    }()
+
     private weak var currentStream: NetStream? {
         didSet {
             oldValue?.mixer.videoIO.renderer = nil
@@ -70,7 +75,7 @@ extension MTHKView: MTKViewDelegate {
     public func draw(in view: MTKView) {
         guard
             let currentDrawable = currentDrawable,
-            let commandBuffer = device?.makeCommandQueue()?.makeCommandBuffer(),
+            let commandBuffer = commandQueue?.makeCommandBuffer(),
             let context = currentStream?.mixer.videoIO.context else {
             return
         }

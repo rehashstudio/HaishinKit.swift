@@ -38,14 +38,14 @@ class ProgramSpecific: PSIPointer, PSITableHeader, PSITableSyntax {
 
     // MARK: PSITableHeader
     var tableID: UInt8 = 0
-    var sectionSyntaxIndicator: Bool = false
-    var privateBit: Bool = false
+    var sectionSyntaxIndicator = false
+    var privateBit = false
     var sectionLength: UInt16 = 0
 
     // MARK: PSITableSyntax
     var tableIDExtension: UInt16 = ProgramSpecific.defaultTableIDExtension
     var versionNumber: UInt8 = 0
-    var currentNextIndicator: Bool = true
+    var currentNextIndicator = true
     var sectionNumber: UInt8 = 0
     var lastSectionNumber: UInt8 = 0
     var tableData: Data {
@@ -213,70 +213,5 @@ final class ProgramMapSpecific: ProgramSpecific {
                 logger.error("\(buffer)")
             }
         }
-    }
-}
-
-// MARK: -
-enum ElementaryStreamType: UInt8 {
-    case mpeg1Video = 0x01
-    case mpeg2Video = 0x02
-    case mpeg1Audio = 0x03
-    case mpeg2Audio = 0x04
-    case mpeg2TabledData = 0x05
-    case mpeg2PacketizedData = 0x06
-
-    case adtsaac = 0x0F
-    case h263 = 0x10
-
-    case h264 = 0x1B
-    case h265 = 0x24
-}
-
-// MARK: -
-struct ElementaryStreamSpecificData {
-    static let fixedHeaderSize: Int = 5
-
-    var streamType: UInt8 = 0
-    var elementaryPID: UInt16 = 0
-    var ESInfoLength: UInt16 = 0
-    var ESDescriptors = Data()
-
-    init() {
-    }
-
-    init?(_ data: Data) {
-        self.data = data
-    }
-}
-
-extension ElementaryStreamSpecificData: DataConvertible {
-    // MARK: BytesConvertible
-    var data: Data {
-        get {
-            ByteArray()
-                .writeUInt8(streamType)
-                .writeUInt16(elementaryPID | 0xe000)
-                .writeUInt16(ESInfoLength | 0xf000)
-                .writeBytes(ESDescriptors)
-                .data
-        }
-        set {
-            let buffer = ByteArray(data: newValue)
-            do {
-                streamType = try buffer.readUInt8()
-                elementaryPID = try buffer.readUInt16() & 0x0fff
-                ESInfoLength = try buffer.readUInt16() & 0x01ff
-                ESDescriptors = try buffer.readBytes(Int(ESInfoLength))
-            } catch {
-                logger.error("\(buffer)")
-            }
-        }
-    }
-}
-
-extension ElementaryStreamSpecificData: CustomDebugStringConvertible {
-    // MARK: CustomDebugStringConvertible
-    var debugDescription: String {
-        Mirror(reflecting: self).debugDescription
     }
 }
